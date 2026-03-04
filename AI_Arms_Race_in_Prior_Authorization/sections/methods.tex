@@ -1,0 +1,71 @@
+\section{Methods}
+\label{sec:methods}
+
+\subsection{Case and Policy Selection}
+\label{sec:case}
+
+Demonstrating AI coordination failure in prior authorization requires: (1) complete patient data including demographics, history, labs, and medications; (2) a treatment context where PA is required and known to create friction; and (3) a genuine policy gray zone where strategy can determine interpretation.
+
+We selected infliximab for Crohn's disease from a published case report \citep{pmc8077752}: a 60-year-old female with Crohn's disease, small intestinal stricturing, partial response to mesalazine 3~g/day, elevated fecal calprotectin (827~$\mu$g/g, indicating active inflammation), and cytopenias (WBC 3.2$\times$10$^9$/L, platelets 123$\times$10$^9$/L). Full patient data are in Appendix~\ref{sec:case-data}.
+
+Each agent receives a different document, creating information asymmetry that mirrors real-world practice. The provider agent receives the AGA 2021 clinical guideline \citep{aga2021crohns}, which suggests early biologic introduction for moderate-to-severe Crohn's disease without requiring prior steroid failure. The insurer agent receives Cigna coverage policy IP0660 \citep{cigna2026infliximab}, a checklist-style step-therapy document that requires documentation of steroid trial or contraindication, conventional systemic therapy trial, fistulas, or ileocolonic resection, and explicitly excludes mesalamine as qualifying systemic therapy. Full document texts are in Appendix~\ref{sec:policies}. These documents point in opposite directions for this patient: the clinical guideline supports immediate infliximab, while the coverage policy demands a step-therapy prerequisite that the patient has not formally met.
+
+The interaction between these conflicting documents creates a genuine interpretive gray zone centered on a single pivot point. Three of the four qualifying pathways are clearly unmet: no conventional immunomodulator trial (the patient's cytopenias make azathioprine/6-MP risky), no fistulizing disease, and no prior resection. Everything therefore hinges on the remaining steroid contraindication. The patient's cytopenias make corticosteroids clinically risky (steroids can further suppress bone marrow), but this risk is not a formal, documented contraindication. Whether cytopenias-as-steroid-risk satisfies the coverage policy's contraindication criterion depends on interpretive stance: a good-faith reading says yes (steroids were considered but are unsafe); a literal reading says no (no formal contraindication is documented). This case thus serves as an existence proof: the clinical facts create a genuine ambiguity that the experiment tests agents' ability to resolve (Section~\ref{sec:gray-zone}).
+
+\subsection{Simulation Design}
+\label{sec:simulation}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{flowchart.jpg}
+\caption{Phase~2 (Utilization Review) simulation flow. Phase~3 (Claims Adjudication) follows the same structure for delivered services, with WRITE\_OFF replacing the abandon modes. Full agent specifications are in Appendix~\ref{sec:agent-details}.}
+\label{fig:flowchart}
+\end{figure*}
+
+The simulation proceeds in four phases (Figure~\ref{fig:flowchart}). Phase~1 presents the patient case to the agents (currently deterministic; see Appendix~\ref{sec:phase-design} for the noise-injection design). Phase~2 (Utilization Review) and Phase~3 (Claims Adjudication) contain the strategic interaction. Phase~4 computes the financial settlement (currently per-line reimbursement; see Appendix~\ref{sec:phase-design} for the planned extensions).
+
+In Phase~2, the provider and insurer negotiate over prior authorization through alternating submissions and adjudications. The provider requests services with clinical justification; the insurer evaluates each request against coverage policy. When the insurer approves a lab or imaging order, the Environment returns results from the patient record (or, if no result exists in the source data, generates a clinically appropriate one), allowing the provider to use new findings in subsequent requests. Phase~2 continues until every requested service reaches a terminal state. Phase~3 follows the same logic but only for services that were approved or that the provider chose to deliver despite denial.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{flowchart_2.png}
+\caption{Provider per-line action space, expanding the provider decision node in Figure~\ref{fig:flowchart}. At any point the provider may also RESUBMIT (bundle-level), withdrawing all lines and restarting at Level~0 (see Figure~\ref{fig:flowchart}). *~pending\_info is not issued by the insurer at Level~2. **~APPEAL is not available at Level~2 (maximum review level). }
+\label{fig:provider-action}
+\end{figure*}
+
+We model three review levels grounded in the Medicare appeal structure \citep{cms2024appeals}: initial determination (Level~0), first appeal (Level~1), and independent external review (Level~2). The simulation terminates at Level~2 because Levels~0--2 encompass the purely administrative interaction loop: the domain where AI automation is currently being deployed. Further legal appeals (ALJ, federal court) involve formal proceedings with different rules of evidence, placing them outside AI-mediated negotiation. Appendix~\ref{sec:appeal-levels} maps these to Medicare's five-level system.
+
+\subsection{Strategy Operationalization}
+\label{sec:strategy}
+
+We operationalize three strategy conditions. In the \textbf{default} condition, no strategy guidance is injected, revealing the LLM's baseline disposition in gray-zone situations. In the \textbf{cooperate} and \textbf{defect} conditions, we inject interpretive guidance into the system prompt. All conditions share the same clinical facts, clinical guideline, and coverage policy; they differ only in ambiguity-resolution framing:
+
+\textbf{Provider cooperate:} ``Choose the minimum clinically defensible set of requested services and the lowest reasonable intensity that still supports timely, appropriate treatment.''
+
+\textbf{Provider defect:} ``Choose the maximum plausibly defensible set of requested services and the highest plausible intensity supported by the case facts/policy. Include additional supportive line items if remotely justifiable; do not fabricate facts.''
+
+\textbf{Insurer cooperate:} ``Apply policy in a good-faith, access-preserving way. If the request plausibly satisfies policy, approve. Prefer approve over deny when policy interpretation is genuinely ambiguous.''
+
+\textbf{Insurer defect:} ``Apply policy in a strict, cost-containment way. If the request is not clearly supported by explicit policy criteria and documentation, deny or modify/downgrade. Prefer deny over approve when evidence is borderline.''
+
+Full prompts are provided in Appendix~\ref{sec:prompts}.
+
+\subsection{Experimental Design}
+\label{sec:design}
+
+We employ a 3$\times$3 factorial design crossing provider strategy (cooperate, defect, default) with insurer strategy (cooperate, defect, default), yielding the nine conditions shown in Table~\ref{tab:conditions}.
+
+\begin{table*}[h]
+\centering
+\caption{Experimental conditions. C = Cooperate, D = Defect, N = Default (no guidance).}
+\label{tab:conditions}
+\begin{tabular}{lccc}
+\toprule
+ & \textbf{Insurer C} & \textbf{Insurer D} & \textbf{Insurer N} \\
+\midrule
+\textbf{Provider C} & CP\_CI & CP\_DI & CP\_NI \\
+\textbf{Provider D} & DP\_CI & DP\_DI & DP\_NI \\
+\textbf{Provider N} & NP\_CI & NP\_DI & NP\_NI \\
+\bottomrule
+\end{tabular}
+\end{table*}

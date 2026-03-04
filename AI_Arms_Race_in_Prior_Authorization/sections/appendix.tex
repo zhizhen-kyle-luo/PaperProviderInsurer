@@ -1,0 +1,240 @@
+\section{Case Data}
+\label{sec:case-data}
+
+The patient case is represented as a structured JSON object with two top-level partitions. \texttt{patient\_visible\_data} contains all information available to both agents: demographics (age, sex), chief complaint, medical history, current medications, vital signs, and lab results (fecal calprotectin, albumin, leukocytes, platelets, serum calcium, serum magnesium, T-SPOT.TB). \texttt{environment\_hidden\_data} contains the ground-truth diagnosis, disease severity context, and the intended treatment request (infliximab 5~mg/kg); this partition is used by the Environment component for result synthesis but is not exposed to either strategic agent. The full case JSON is available in the supplementary materials.
+
+\section{Policy Documents}
+\label{sec:policies}
+
+Each agent receives one document---the provider a clinical guideline, the insurer a coverage policy---creating the information asymmetry described in Section~\ref{sec:case}. Below we reproduce the coverage criteria as structured for agent consumption.
+
+\subsection{Provider: AGA 2021 Guidelines}
+
+The provider agent receives the following key recommendations:
+\begin{enumerate}
+    \item Use anti-TNF therapy (e.g., infliximab) for induction and maintenance of remission in moderate to severe Crohn's disease.
+    \item In biologic-na\"ive moderate to severe Crohn's disease, infliximab is a recommended option for induction.
+    \item Prefer early introduction of a biologic ($\pm$ immunomodulator) rather than delaying until after failure of mesalamine and/or corticosteroids.
+    \item Recommend against 5-ASA/mesalamine for induction or maintenance of remission in moderate to severe Crohn's disease.
+\end{enumerate}
+
+The decision logic provided to the agent states: ``If the clinical picture supports moderate--severe Crohn's disease (and/or high-risk/complicated features), biologic therapy such as infliximab is guideline-concordant even if the patient has not formally `failed' mesalamine and/or corticosteroids.''
+
+\subsection{Insurer: Cigna IP0660 Step-Therapy Criteria}
+
+The insurer agent receives Cigna Drug Coverage Policy IP0660 (effective 2026-01-01). For Crohn's disease initial therapy, the policy requires \emph{all} of:
+\begin{itemize}
+    \item Patient is $\geq$ 6 years of age.
+    \item Patient meets \textbf{one} of the following (a, b, c, or d).
+    \item The medication is prescribed by or in consultation with a gastroenterologist.
+\end{itemize}
+
+The step-therapy options are:
+\begin{description}
+    \item[(a)] Patient has tried or is currently taking corticosteroids, or corticosteroids are contraindicated. (Examples: prednisone, methylprednisolone.)
+    \item[(b)] Patient has tried one other conventional systemic therapy for Crohn's disease. (Examples: azathioprine, 6-mercaptopurine, methotrexate.)
+    \item[(c)] Patient has enterocutaneous (perianal or abdominal) or rectovaginal fistulas.
+    \item[(d)] Patient had ileocolonic resection (to reduce the chance of Crohn's disease recurrence).
+\end{description}
+
+\noindent\textbf{Explicit exclusion:} A trial of mesalamine does \emph{not} count as a systemic therapy for Crohn's disease.
+
+\noindent\textbf{Exception:} An exception to the requirement for a trial of or contraindication to steroids or a trial of one other conventional systemic agent can be made if the patient has already tried at least one biologic other than the requested medication. A biosimilar of the requested biologic does not count.
+
+The gray zone (Section~\ref{sec:case}) centers on option~(a): the patient's cytopenias arguably make corticosteroids contraindicated, but no formal contraindication is documented in the case data. The full structured policy (including continuation criteria, dosing limits, and preferred product requirements) is available in the supplementary materials.
+
+\section{System Prompts}
+\label{sec:prompts}
+
+All agents use GPT-5 (Azure OpenAI) with JSON mode. Prompts follow a context engineering structure: the system prompt defines role, behavioral guidelines, strategy, and domain knowledge (stable across turns); the user prompt provides task instructions, context metadata, patient data, encounter history, and output schema (changes per turn). Below we reproduce the insurer system prompt template and all four strategy injection strings. The full prompt construction code (including provider prompts, action prompts, and Phase~3 prompts) is available in the supplementary materials.
+
+\subsection{Insurer System Prompt Template}
+
+The insurer agent receives the following system prompt (with \texttt{\{strategy\_block\}} and \texttt{\{policy\_block\}} injected per condition):
+
+\begin{quote}
+\small
+You are an insurance utilization management team adjudicating a prior authorization request. Your goal: render coverage decisions based on policy criteria and clinical documentation.
+
+\textbf{ADMINISTRATIVE COST CONSIDERATION:}
+Each PA review costs \~{}\$3.50 (manual) to \~{}\$0.05 (electronic) in processing (CAQH 2023). Apply reasonableness standard: Do not request documentation already submitted. Do not pend repeatedly for the same item. If criteria cannot be met, deny clearly rather than pend indefinitely.
+
+\texttt{\{strategy\_block\}}
+
+\texttt{\{policy\_block\}}
+
+\texttt{\{workflow\_definitions\}}
+\end{quote}
+
+\subsection{Strategy Injection Strings}
+\label{sec:strategy-strings}
+
+Section~\ref{sec:strategy} presents the core guidance for each strategy condition. The full strings injected into the system prompt include additional tactical framing (e.g., ``Avoid adding extra line items or upgrading level-of-care unless clearly required'' for provider cooperate; ``demand stricter documentation and interpret ambiguity against approval'' for insurer defect). These are injected under a \texttt{STRATEGY GUIDANCE} header. In the default condition, no strategy block is injected. The complete prompt construction code is available in the supplementary materials.
+
+\section{Agent Specifications and Action Spaces}
+\label{sec:agent-details}
+
+This appendix provides the full technical specification of agent action spaces and request/response schemas summarized in Section~\ref{sec:agents}.
+
+\subsection{Service Line Types}
+
+Each provider request contains service lines classified as one of three types:
+\begin{itemize}
+    \item \textbf{diagnostic\_test}: Labs, imaging, pathology. When approved, the Environment returns results (ground-truth or synthesized).
+    \item \textbf{treatment}: Medications and procedures. Subject to coverage policy criteria (e.g., step-therapy).
+    \item \textbf{level\_of\_care}: Inpatient admission, observation, skilled nursing facility, home health. Determines the setting in which services are rendered.
+\end{itemize}
+
+\subsection{Provider Action Space}
+
+After receiving an insurer response, the provider chooses one of two action modes:
+
+\paragraph{RESUBMIT.} Withdraw the entire authorization and start fresh at Level~0. All prior line statuses are reset. This is not a formal appeal; the insurer treats it as a new request. Use case: the provider's own submission contained errors (wrong procedure codes, missing documentation). Strategically, this avoids consuming appeal levels on fixable errors.
+
+\paragraph{LINE\_ACTIONS.} Specify per-line responses for each non-approved line:
+\begin{itemize}
+    \item \texttt{ACCEPT\_MODIFY}: Accept the insurer's modification (for lines with status \texttt{modified}). The modified terms become the authorized service.
+    \item \texttt{PROVIDE\_DOCS}: Supply requested documentation (for lines with status \texttt{pending\_info}). The insurer re-adjudicates at the same review level.
+    \item \texttt{APPEAL}: Escalate to the next review level (for lines with status \texttt{denied} or \texttt{modified}). Use when the provider believes the submission was correct but the insurer misapplied policy.
+    \item \texttt{ABANDON}: Give up on the line with one of two modes:
+    \begin{itemize}
+        \item \texttt{NO\_TREAT}: Patient does not receive the service.
+        \item \texttt{TREAT\_ANYWAY}: Provider delivers the service and absorbs the cost (no insurer reimbursement).
+    \end{itemize}
+\end{itemize}
+
+The distinction between RESUBMIT and APPEAL is strategic: RESUBMIT corrects provider errors; APPEAL disputes insurer judgment.
+
+\paragraph{Delivery assumption.}
+Approved services are always delivered: if the insurer approves a line, the provider renders the service. Lines abandoned with \texttt{TREAT\_ANYWAY} are also delivered, with the provider absorbing cost (no insurer reimbursement). All other abandoned lines are not delivered.
+
+\paragraph{Phase~3 differences.}
+Phase~3 (Claims Adjudication) processes billing for delivered services using the same turn structure as Phase~2. The provider may appeal or write off denied claims (\texttt{WRITE\_OFF} replaces the Phase~2 abandon modes \texttt{NO\_TREAT}/\texttt{TREAT\_ANYWAY}). 
+\subsection{Insurer Decision Space}
+
+Per service line, the insurer renders one of four decisions:
+\begin{itemize}
+    \item \texttt{approved}: Authorization issued for the requested service.
+    \item \texttt{modified}: Approved with changes to quantity, procedure code, or service parameters.
+    \item \texttt{denied}: Does not meet coverage criteria.
+    \item \texttt{pending\_info}: Additional documentation requested. Not permitted at Level~2.
+\end{itemize}
+
+\subsection{Request and Response Schemas}
+
+Request and response schemas derive from X12 278 (Health Care Services Review -- prior authorization), X12 837 (Health Care Claim), and X12 835 (Claim Payment/Remittance Advice) transaction standards. Table~\ref{tab:schema-fields} summarizes the key fields used in each phase. Full schema definitions and the complete X12 field mapping are available in the supplementary materials.
+
+\begin{table*}[t]
+\centering
+\caption{Key schema fields by phase, with X12 transaction set origin.}
+\label{tab:schema-fields}
+\begin{tabular}{llll}
+\toprule
+\textbf{Phase} & \textbf{Direction} & \textbf{X12 Set} & \textbf{Key Fields} \\
+\midrule
+2 & Provider $\to$ Insurer & 278 Request & diagnosis\_codes, procedure\_code, code\_type, \\
+  &                        &             & request\_type, requested\_quantity, clinical\_evidence \\
+2 & Insurer $\to$ Provider & 278 Response & authorization\_status, decision\_reason, \\
+  &                        &              & approved\_quantity, authorization\_number, \\
+  &                        &              & modification\_type, requested\_documents \\
+3 & Provider $\to$ Insurer & 837 Claim    & procedure\_code, authorization\_number, \\
+  &                        &              & clinical\_documentation \\
+3 & Insurer $\to$ Provider & 835 Remittance & adjudication\_status, decision\_reason, \\
+  &                        &                & adjustment\_group\_code \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Interaction Logs}
+\label{sec:logs}
+
+Each simulation run produces a structured audit log containing the complete sequence of provider submissions, insurer adjudications, provider actions, and Environment synthesis events, along with a metrics summary (turn counts, appeal counts, line outcomes). We develop an audit viewer tool for structured examination of these logs; it is available at \texttt{[link-placeholder]}. Raw audit logs for all nine conditions are included in the supplementary materials.
+
+\section{Review Level Design}
+\label{sec:appeal-levels}
+
+Our three-level review structure (Section~\ref{sec:levels}) is grounded in the Medicare Fee-for-Service appeals process \citep{cms2024appeals}. Medicare defines five levels of appeal that follow an initial coverage determination:
+
+\begin{enumerate}
+    \item \textbf{Redetermination} by a Medicare Administrative Contractor (MAC)
+    \item \textbf{Reconsideration} by a Qualified Independent Contractor (QIC)
+    \item \textbf{Hearing} before an Administrative Law Judge (ALJ) within the Office of Medicare Hearings and Appeals
+    \item \textbf{Review} by the Medicare Appeals Council
+    \item \textbf{Judicial review} in federal district court
+\end{enumerate}
+
+Critically, the initial coverage determination (in which the insurer first adjudicates a prior authorization request) is \emph{not} itself an appeal level. The five-level appeal process begins only after a denial at initial determination. Table~\ref{tab:level-mapping} maps our simulation levels to this structure.
+
+\begin{table*}[h]
+\centering
+\caption{Mapping of simulation review levels to Medicare FFS appeal structure.}
+\label{tab:level-mapping}
+\begin{tabular}{lll}
+\toprule
+\textbf{Simulation} & \textbf{Medicare Equivalent} & \textbf{Reviewer} \\
+\midrule
+Level 0 & Initial Determination & Insurer agent \\
+Level 1 & Redetermination (MAC) & Insurer agent \\
+Level 2 & Reconsideration (QIC/IRE) & Insurer agent \\
+\midrule
+Not modeled & ALJ Hearing & -- \\
+Not modeled & Appeals Council & -- \\
+Not modeled & Federal Court & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+We model through Level~2 because Levels~1--2 represent the administrative appeals process in which the dispute remains between the provider and insurer (or an independent reviewer). Levels~3--5 involve formal legal proceedings with different rules of evidence, representation requirements, and adjudicatory bodies, placing them outside the scope of an LLM-mediated negotiation simulation.
+
+In practice, each real-world review level involves different reviewer types: initial determinations may be handled by utilization management nurses or automated systems, first-level appeals may involve medical director peer-to-peer review, and independent external reviews are conducted by entities with no relationship to the insurer. Our simulation does not encode these distinctions; the same insurer agent adjudicates at all levels (see Section~\ref{sec:limitations} for discussion of this limitation).
+
+\section{Cost Data Sources}
+\label{sec:cost-data}
+
+Service prices used for the payoff analysis (Section~\ref{sec:payoff}) are drawn from CMS-administered fee schedules. We assume a non-facility setting and a 60\,kg patient receiving infliximab 5\,mg/kg (300\,mg = 30 billing units per infusion). Per-infusion drug prices = ASP per 10\,mg $\times$ 30 units.
+
+\textbf{Drug prices} (WV BMS ASP Pricing File, CMS national ASP + 6\%, Q4 2025):
+\begin{itemize}
+  \item J1745 Infliximab (Remicade): \$932.70/infusion
+  \item Q5121 Infliximab-axxq (Avsola): \$612.15/infusion
+  \item Q5104 Infliximab-dyyb (Renflexis): \$809.97/infusion
+\end{itemize}
+
+The DP\_CI insurer agent proposed ``Q5105 Infliximab-abda (Renflexis),'' but Q5105 is Retacrit (epoetin alfa-epbx). The correct HCPCS code for Renflexis is Q5104; we use Q5104 pricing.
+
+\textbf{Lab prices} (WV BMS Clinical Lab Fee Schedule, 04/2025--03/2026):
+\begin{itemize}
+  \item 80074 Acute Hepatitis Panel: \$42.87
+  \item 80053 Comprehensive Metabolic Panel: \$9.50
+  \item 85025 CBC with Differential: \$6.99
+  \item 86140 C-Reactive Protein: \$4.66
+  \item 87340 HBsAg: \$9.30
+  \item 86704 Anti-HBc (total): \$10.85
+  \item 86706 Anti-HBs: \$9.67
+  \item 86803 HCV Antibody: \$12.84
+  \item 83993 Fecal Calprotectin: \$17.67
+\end{itemize}
+
+\textbf{Infusion administration and imaging} (benchmark estimates, bounded below by verified CMS PFS facility rates, calibrated against CY~2025 CF = \$32.3465):
+\begin{itemize}
+  \item 96413 Chemo IV infusion, initial hr: ${\sim}$\$130
+  \item 96365 Therapeutic IV infusion, initial hr: ${\sim}$\$70
+  \item 74183 MRI abdomen w/wo contrast: ${\sim}$\$350
+  \item 72197 MRI pelvis w/wo contrast: ${\sim}$\$350
+\end{itemize}
+
+These four codes collectively account for $<$15\% of total service value in any condition; varying by $\pm$50\% does not alter the game-theoretic classification.
+
+\textbf{Administrative costs} (2023 CAQH Index, electronic prior authorization): $c_P = \$5.79$/turn (provider), $c_I = \$0.05$/turn (insurer).
+
+\section{Phase Architecture}
+\label{sec:phase-design}
+
+\paragraph{Phase 1: Patient Presentation.}
+Phase~1 currently loads the patient case deterministically from a published case report. The architecture is designed to support probabilistic noise injection: introducing missing labs, transcription errors, or incomplete medication histories into the patient record before agents see it. The primary motivation is ecological validity: patient data errors are among the most common real-world denial triggers, and modeling them is necessary to capture this class of PA friction. A secondary benefit is that noise injection generates multiple realistic case variations from a single published artifact, addressing the practical scarcity of publicly available PA cases with complete clinical data.
+
+\paragraph{Phase 4: Financial Settlement.}
+Phase~4 currently computes provider reimbursement and insurer payment per service line based on CMS fee schedules (Appendix~\ref{sec:cost-data}). The architecture is designed to also calculate patient out-of-pocket costs (copays, coinsurance, deductible contributions) and, in future work, to feed settlement outcomes back into Phase~1 as a repeated game. This feedback loop would enable modeling of market-level dynamics that emerge over repeated interactions: patient plan-switching driven by denial experiences, provider network attrition, insurer algorithm adaptation in response to detected documentation patterns, and reputation effects. These dynamics matter because the pathologies of interest (market failure, trust erosion, AI arms race escalation) emerge from repeated games, not single episodes. The current single-episode design captures individual outcomes; the Phase~4-to-Phase~1 feedback loop is the architectural hook for this extension.
+
+\bigskip
+\noindent\textbf{Supplementary Materials.} The full codebase, including case data JSON, complete policy files, prompt construction code, raw interaction logs, and X12 schema field mappings, is available at \texttt{[link-placeholder]}.

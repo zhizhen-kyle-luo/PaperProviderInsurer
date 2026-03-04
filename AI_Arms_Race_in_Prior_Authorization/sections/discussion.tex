@@ -1,0 +1,34 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Gray Zone and Strategic Interpretation}
+\label{sec:gray-zone}
+
+With clinical facts and policy held constant across all nine conditions, strategy alone determined whether the patient received the drug, confirming that the case sits in a genuine interpretive gray zone. The key mechanism is the insurer's choice between \texttt{pending\_info} and outright denial at initial review. Cooperating insurers used \texttt{pending\_info} as a collaborative signal (``show me why this qualifies''), then accepted the cytopenias argument. Defecting and default insurers issued immediate denials and never used \texttt{pending\_info} in any turn. This binary (pend versus deny) determined the drug coverage outcome across all nine conditions.
+
+The default insurer's behavior (Section~\ref{sec:default-insurer}) suggests the \texttt{pending\_info} mechanism is specifically tied to the cooperative strategy injection. Without explicit ``prefer approve over deny'' guidance, the LLM defaulted to literal policy application. This raises a question for real-world deployment: if AI adjudication systems are deployed without explicit interpretive guidance, our results suggest they may deny gray-zone treatments by default, not out of strategic cost-containment, but because literal policy application produces denial when criteria are ambiguous.
+
+Strategy injection also governed provider behavior: service line volume (cooperate 2--5, defect 7--13, default 2--5), documentation aggressiveness, and willingness to appeal. Default providers behaved closer to cooperating providers in scope but diverged in composition, requesting imaging and IV administration codes that cooperating providers omitted.
+
+Returning to the question posed in the introduction: does the coordination failure predicted by \citet{moritz2025lancet} emerge? At observed administrative costs, no. The game-theoretic analysis (Section~\ref{sec:payoff}) shows that the 116$\times$ cost asymmetry produces an exploitation structure, not a prisoner's dilemma: the insurer has a dominant strategy to defect because denial is nearly costless, and the provider's strategy is irrelevant under insurer defection. This is arguably worse than the predicted PD from the provider's perspective, because in a prisoner's dilemma both parties at least have an incentive to negotiate toward mutual cooperation, whereas in an exploitation game the insurer has no such incentive. The PD structure emerges only under richer cost models where insurer defection carries meaningful consequences (litigation, network attrition, reputational damage), suggesting that the coordination-failure framing, while directionally correct, understates the severity of the current asymmetry.
+
+% \subsection{Limitations and Future Work}
+% \label{sec:limitations}
+
+% \paragraph{Utility function incompleteness.}
+% Equations~\ref{eq:u_provider}--\ref{eq:u_insurer} capture direct financial outcomes and administrative costs but omit factors that constrain real-world insurer defection: litigation risk, network effects (providers exiting insurer networks after systematic denials), reputational costs (public denial-rate reporting affecting enrollment), and patient outcome externalities (denied treatments producing downstream emergency utilization). These omitted factors all punish insurer defection, explaining why our model finds defection lucrative (\$2,274 at mutual defection) while real-world insurers face meaningful constraints. Incorporating these costs would raise the effective price of insurer defection, potentially crossing the threshold where the game transitions from exploitation to a prisoner's dilemma (Section~\ref{sec:payoff}).
+
+% \paragraph{Appeal chain truncation.}
+% Our simulation terminates at Level~2 (Independent Review Entity), but real-world providers can pursue further legal appeals through ALJ hearings, the Medicare Appeals Council, and federal court. Truncating the appeal chain removes the provider's credible escalation threat, biasing the game toward insurer dominance. This is distinct from the litigation risk discussed above as an omitted cost; here, the provider's strategic option set is also truncated, not just the insurer's cost function.
+
+% \paragraph{Cross-turn service attribution.}
+% When the provider resubmits with a changed service set, the audit log records what changed but not \emph{why}. A dropped line could represent a concession, error correction, or strategic gaming; these are observationally equivalent. Our final-state pricing sidesteps this by pricing only terminal services, at the cost of losing signal about within-run concessions. A fix: require the provider to emit a structured \texttt{resubmission\_reason} per changed line, logged but not exposed to the insurer to preserve information asymmetry.
+
+% \paragraph{Reviewer differentiation.}
+% Real-world review levels involve different reviewer types with different authority, and AI involvement in adjudication likely decreases at higher levels. Our insurer agent adjudicates with the same prompt at all levels (Appendix~\ref{sec:appeal-levels}). Insurers' internal decision processes are largely proprietary, making it difficult to model how criteria shift across levels.
+
+% \paragraph{Temporal costs.}
+% The simulation measures burden in turns but does not model the cost of time. Each turn represents days to weeks of delay; for a patient with active Crohn's and bowel stricturing, delay risks disease progression and hospitalization. A time-aware utility function would penalize turns as patient harm, likely strengthening the case against prolonged denial strategies.
+
+% \paragraph{Single case, single model, single run.}
+% This study uses one clinical case with one insurer policy. The gray zone mechanism (cytopenias as steroid contraindication) is case-specific; other drug-disease-policy combinations will produce different ambiguity structures. All agents use GPT-5 via Azure OpenAI; different models may exhibit different strategic sensitivities and error rates (e.g., the Q5105 code hallucination in DP\_CI). Each condition was run once, but LLM outputs are stochastic: alternate runs of CP\_DI shifted the Nash equilibrium from (D,D) to (C,D) (Section~\ref{sec:stochastic}). Within each run, default agent behavior was internally consistent (the default insurer denied at every decision point and never used \texttt{pending\_info}), but this within-run consistency does not preclude across-run variation. Multiple replications across cases, policy types, and foundation models are needed to assess generalizability.

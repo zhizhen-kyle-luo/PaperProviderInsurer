@@ -1,0 +1,15 @@
+\section{Introduction}
+\label{sec:introduction}
+Prior authorization (PA) is a utilization management process requiring providers to obtain insurer approval before rendering certain services. Insurers adjudicate requests by approving, modifying, denying, or requesting documentation; providers may appeal through successive review levels. This creates substantial administrative burden: physicians complete 39 PA requests weekly, spending 13 hours on PA-related tasks \citep{ama2024pa}. Both sides are now deploying artificial intelligence to gain advantage: insurers use AI to scrutinize claims and increase denials, while providers deploy AI to generate appeals and optimize documentation \citep{williams2024hfma}.
+
+\citet{moritz2025lancet} argue that this dynamic resembles a prisoner's dilemma, warning that ``each party's rational decision to adopt AI for self-protection creates collectively harmful outcomes for everyone.'' The incentive structure is clear: if one party deploys AI, the other must respond or face disadvantage. Yet mutual AI deployment may produce worse outcomes than mutual restraint: more administrative burden, more denials, more appeals, with no improvement in patient care. This raises a fundamental question: what happens when both provider and insurer use large language models to interpret ambiguous coverage policy? Does the predicted coordination failure actually emerge, and through what mechanism?
+
+We address this through a controlled simulation study. Our contributions are:
+\begin{enumerate}
+    \item \textbf{Multi-agent PA simulation framework.}
+    We develop an environment where LLM-driven provider and insurer agents negotiate prior authorization through iterative submission, adjudication, and appeal cycles. Agents operate under information asymmetry (clinical guidelines vs.\ coverage policy) with behavior controlled via prompt-based strategy injection (cooperate, defect, or no guidance).
+    \item \textbf{3$\times$3 factorial experiment.}
+    On a single gray-zone clinical case, we cross three provider strategies with three insurer strategies and identify a \texttt{pending\_info} vs.\ denial mechanism through which gray-zone ambiguity is resolved. Default (no-guidance) insurer agents apply policy literally, denying gray-zone treatments without cooperative interpretation.
+    \item \textbf{Game-theoretic payoff analysis.}
+    We derive utility functions from simulation outcomes and show the game's classification is parameter-dependent: at observed administrative costs, a 116$\times$ cost asymmetry makes denial nearly costless for insurers, producing an exploitation structure; under richer cost models, the game can transition to the prisoner's dilemma hypothesized.
+\end{enumerate}

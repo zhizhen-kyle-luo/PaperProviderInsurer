@@ -1,0 +1,35 @@
+\documentclass[pmlr,twocolumn,10pt]{jmlr}
+% packages
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{subcaption}
+% definitions
+% (jmlr.cls in TeX Live doesn't define these JMLR-style macros; provide fallbacks.)
+\providecommand{\jmlrheading}[6]{}
+\providecommand{\ShortHeadings}[2]{}
+\newcommand{\dataset}{{\sc Bdata}}
+\newcommand{\datasetb}{{\sc Bdata}$_b$}
+\begin{document}
+% heading arguments: volume, year, pages (unset until publication)
+\jmlrheading{1}{2026}{1-XX}{X/XX}{XX/XX}{Author et al.}
+% short title for running head
+\firstpageno{1}
+\title{Multi-Agent Simulation of AI-Mediated Prior Authorization for Specialty Medications }
+\author{\Name{Anonymous Author(s)} \Email{anonymous@anonymous.edu}\\
+\addr Anonymous Institution
+}
+\maketitle
+\begin{abstract}
+Insurers and providers are both deploying AI in prior authorization, raising concerns of a prisoner's dilemma where mutual adoption produces collectively harmful outcomes. We develop a multi-agent simulation where LLM-driven provider and insurer agents negotiate authorization for a specialty medication under information asymmetry, with cooperative, adversarial, or no-guidance strategies injected via prompts. In a 3$\times$3 factorial experiment on a single gray-zone clinical case, we find that the insurer's choice between requesting additional information and outright denial at initial review is the mechanism through which gray-zone ambiguity is resolved. Default (no-guidance) insurer agents denied the drug while approving diagnostics, applying policy literally rather than interpretively, suggesting that AI adjudication systems deployed without explicit guidance may default to denial in ambiguous cases. Game-theoretic analysis shows the game's classification is parameter-dependent: at observed administrative costs (\$5.79/turn for providers vs.\ \$0.05/turn for insurers, a 116$\times$ asymmetry), the game is an asymmetric exploitation where denial is nearly costless for insurers; under richer cost models incorporating litigation, reputational, and network costs, it can transition to the prisoner's dilemma hypothesized by prior work.
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+\bibliography{references}
+\appendix
+\input{sections/appendix}
+\end{document}

@@ -1,0 +1,38 @@
+name: Compile LaTeX
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: AI_Arms_Race_in_Prior_Authorization/main.tex
+          latexmk_use_xelatex: false
+          latexmk_shell_escape: true
+
+      - name: Move PDF to root
+        run: mv AI_Arms_Race_in_Prior_Authorization/main.pdf main.pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper
+          path: main.pdf
+
+      - name: Commit PDF to repo
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add main.pdf
+          git diff --cached --quiet || git commit -m "ci: update compiled PDF"
+          git push

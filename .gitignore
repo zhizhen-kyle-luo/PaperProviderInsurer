@@ -1,0 +1,22 @@
+.DS_Store
+.env
+.venv/
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+.Python
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# editor settings
+settings.json
+settings.local.json
+
+# scratch/working files
+playground.jsx
+CLAUDE.md
+cost_groundtruth.md
+pi_feedback.md
+Lancet.pdf

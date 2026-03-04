@@ -1,0 +1,135 @@
+\section{Results}
+\label{sec:results}
+
+Table~\ref{tab:outcomes} summarizes primary outcomes across all nine experimental conditions.
+
+\begin{table*}[t]
+\centering
+\caption{Primary outcomes by strategy condition. P2 Turns = Phase~2 submission-response cycles. Lines Req = total unique service lines requested. Delivered = services rendered to patient. Paid = claims reimbursed in Phase~3.}
+\label{tab:outcomes}
+\begin{tabular}{lcccccc}
+\toprule
+Condition & Provider & Insurer & P2 Turns & Lines Req & Delivered & Paid \\
+\midrule
+CP\_CI & Cooperate & Cooperate & 2 & 2 & 2 & 2 \\
+CP\_DI & Cooperate & Defect   & 4 & 4 & 0 & 0 \\
+CP\_NI & Cooperate & Default  & 1 & 5 & 3 & 3 \\
+DP\_CI & Defect    & Cooperate & 2 & 11 & 11 & 11 \\
+DP\_DI & Defect    & Defect   & 4 & 7 & 0 & 0 \\
+DP\_NI & Defect    & Default  & 3 & 13 & 9 & 9 \\
+NP\_CI & Default   & Cooperate & 2 & 5 & 5 & 5 \\
+NP\_DI & Default   & Defect   & 3 & 4 & 1 & 1 \\
+NP\_NI & Default   & Default  & 6 & 2 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Condition Summaries}
+\label{sec:condition-summaries}
+
+Across the original four conditions, the cooperate/defect strategy injections produced expected behavior: cooperating-insurer conditions ended in full approval, defecting-insurer conditions in complete denial, validating that the simulation responds to strategy manipulation. The five default-strategy conditions reveal a more nuanced picture.
+
+\textbf{CP\_CI.} The provider requested 2 lines: infliximab (J1745, 3 induction infusions) and an acute viral hepatitis panel (80074). The insurer issued \texttt{pending\_info} requesting step-therapy documentation and biosimilar confirmation. The provider switched to biosimilar infliximab-axxq (Q5121), cited cytopenias (WBC 3.2$\times$10$^9$/L, platelets 123$\times$10$^9$/L) as steroid contraindication, and confirmed GI prescriber involvement. The insurer approved both lines. The Environment synthesized hepatitis panel results (1 synthesis event).
+
+\textbf{CP\_DI.} The provider requested 4 lines: infliximab (J1745) plus individual hepatitis B serologies (HBsAg, anti-HBc, anti-HBs). The insurer denied all lines without \texttt{pending\_info}, citing unmet step-therapy. The provider resubmitted three times with the same cytopenias argument; all were rejected. By turn~3, the provider simplified to infliximab alone, which was still denied. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT}. No diagnostic tests were approved, so no Environment synthesis occurred.
+
+\textbf{CP\_NI.} The provider requested 5 lines: infliximab-dyyb biosimilar (Q5102, 3 induction infusions), IV administration (96413), and hepatitis B serologies (87340, 86704, 86706). The insurer denied the drug and IV administration lines without \texttt{pending\_info}, citing unmet step-therapy, but approved all 3 screening labs. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT} for the denied treatment lines. Phase~2 resolved in 1 turn with no appeals. Three diagnostic lines were delivered and paid.
+
+\textbf{DP\_CI.} The provider requested 11 lines: infliximab (J1745, 5 infusions), IV administration (96365), hepatitis B panel (3 tests), CMP (80053), CBC (85025), CRP (86140), MRI abdomen (74183), MRI pelvis (72197), and fecal calprotectin (83993). The insurer issued \texttt{pending\_info} for treatment lines while immediately approving all 9 diagnostic tests, triggering 9 Environment synthesis events (serologies, metabolic panel, CBC, CRP, MRI, fecal calprotectin). After provider documentation, the insurer approved all 11 lines, switching the drug to biosimilar infliximab-abda under code Q5105.\footnote{Q5105 is actually Retacrit (epoetin alfa-epbx), not an infliximab product. The insurer agent hallucinated this code-drug mapping. The correct code for infliximab-abda (Renflexis) is Q5104; we use Q5104 pricing in the payoff analysis (Section~\ref{sec:payoff}).}
+
+\textbf{DP\_DI.} The provider requested 7 lines: infliximab-axxq biosimilar (Q5121, 3 induction infusions), IV administration (96413), and screening labs (HBsAg, anti-HBc, anti-HBs, HCV Ab, CRP). The insurer denied all 7 lines without \texttt{pending\_info}. The provider resubmitted, then escalated to Level~1 appeal (Medical Director), then Level~2 (IRE). All denied at every level. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT}. As in CP\_DI, no Environment synthesis occurred.
+
+\textbf{DP\_NI.} The provider requested 13 lines: infliximab-dyyb biosimilar (Q5102, 9 infusions), IV administration (96413, 96415 additional hour), diphenhydramine premedication (J1200), hepatitis B serologies (87340, 86704, 86706), CBC (85025), CMP (80053), CRP (86140), MRI abdomen (74183), MRI pelvis (72197), and fecal calprotectin (83993). The insurer denied all treatment lines (drug, IV, premedication) without \texttt{pending\_info}, citing unmet step-therapy, but approved all 9 diagnostic lines. The provider appealed through Level~1 and Level~2; treatment lines remained denied at every level. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT} for the 4 denied lines. Nine diagnostic lines were delivered and paid.
+
+\textbf{NP\_CI.} The provider requested 5 lines: infliximab (J1745, 3 induction infusions), IV administration (96413), MRI abdomen (74183), MRI pelvis (72197), and fecal calprotectin (83993). The insurer issued \texttt{pending\_info} requesting step-therapy documentation for the drug, modified the MRI abdomen line, and approved the remaining diagnostic tests. The provider accepted the modification and supplied documentation. The insurer approved all lines. All 5 lines were delivered and paid.
+
+\textbf{NP\_DI.} The provider requested 4 lines: infliximab-axxq biosimilar (Q5121, 3 induction infusions), IV administration (96413), MRI abdomen (74183), and MRI pelvis (72197). The insurer denied all 4 lines without \texttt{pending\_info}. The provider appealed through Level~1 (Medical Director) and Level~2 (IRE). At Level~2, the reviewer approved infliximab but upheld denial of the remaining 3 lines. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT} for the denied lines. One line was delivered and paid.
+
+\textbf{NP\_NI.} The provider requested 2 lines: infliximab (J1745, 9 infusions) and IV administration (96413, 9 visits). The insurer denied both lines without \texttt{pending\_info}, citing unmet step-therapy. The provider resubmitted with reduced quantities, then appealed through all levels (4 appeals over 6 turns). All denied at every level. The provider chose \texttt{ABANDON} with \texttt{NO\_TREAT}. No services were delivered; this was the most protracted negotiation across all nine conditions.
+
+\subsection{Service Line Composition}
+\label{sec:service-lines}
+
+Table~\ref{tab:service-lines} shows service lines requested by category.
+
+\begin{table*}[t]
+\centering
+\caption{Service lines requested by category and condition.}
+\label{tab:service-lines}
+\begin{tabular}{lccccccccc}
+\toprule
+Category & CP\_CI & CP\_DI & CP\_NI & DP\_CI & DP\_DI & DP\_NI & NP\_CI & NP\_DI & NP\_NI \\
+\midrule
+Treatment (drug) & 1 & 1 & 1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+IV administration & 0 & 0 & 1 & 1 & 1 & 2 & 1 & 1 & 1 \\
+Hepatitis screening & 1 & 3 & 3 & 3 & 4 & 3 & 0 & 0 & 0 \\
+Baseline labs & 0 & 0 & 0 & 3 & 1 & 3 & 0 & 0 & 0 \\
+Imaging & 0 & 0 & 0 & 2 & 0 & 2 & 2 & 2 & 0 \\
+Monitoring & 0 & 0 & 0 & 1 & 0 & 1 & 1 & 0 & 0 \\
+\midrule
+\textbf{Total} & \textbf{2} & \textbf{4} & \textbf{5} & \textbf{11} & \textbf{7} & \textbf{13} & \textbf{5} & \textbf{4} & \textbf{2} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Cooperate providers requested 2--5 lines; defect providers 7--13; default providers 2--5. Defect providers consistently requested the most ancillary services (IV administration, premedication, baseline labs, imaging, and monitoring) while cooperate and default providers requested narrower service sets.
+
+\subsection{Default Agent Behavior}
+\label{sec:default-insurer}
+
+\paragraph{Default insurer.}
+The default insurer denied the drug (infliximab) in all three conditions (CP\_NI, DP\_NI, NP\_NI) while approving diagnostic tests when requested (CP\_NI: 3/3 labs; DP\_NI: 9/9 diagnostics). This contrasts with both the cooperating insurer (which approved everything after \texttt{pending\_info}) and the defecting insurer (which denied everything including diagnostics). The default insurer never used \texttt{pending\_info}, matching the defecting insurer's posture for treatment lines, but diverged by approving ancillary services that did not trigger step-therapy requirements. This ``partial defection'' aligns with how the policy is structured: Cigna IP0660 imposes step-therapy requirements only on the biologic drug, not on diagnostic tests. Without interpretive guidance, the default insurer applied policy literally, denying where explicit criteria were unmet and approving where no restrictive criteria existed.
+
+\paragraph{Default provider.}
+Default providers requested 2--5 lines, comparable in scope to cooperate providers, but with a distinct composition. All three default-provider conditions included IV administration (CPT 96413), which cooperate providers in CP\_CI and CP\_DI omitted. Two of three (NP\_CI, NP\_DI) included imaging (MRI abdomen and pelvis), but none included hepatitis screening or baseline labs (Table~\ref{tab:service-lines}). The default provider's appeal behavior was insurer-dependent: when the cooperating insurer issued \texttt{pending\_info} (NP\_CI), the provider supplied documentation, accepted a modification, and resolved in 2 turns with no appeals. When faced with denial (NP\_DI, NP\_NI), the provider appealed through the maximum review level before abandoning. NP\_NI was the most protracted condition in the experiment (6 turns, 4 appeals), with the provider modifying its request mid-negotiation by reducing infusion quantity from 9 to 3 and changing the diagnosis code to emphasize the obstructive phenotype.
+
+\paragraph{Interaction at NP\_NI.}
+When both agents receive no guidance, the outcome collapsed to complete denial: the default provider requested only 2 lines (drug + IV admin), both subject to step-therapy, and the default insurer denied both. This matches the defect-defect outcome but through different mechanisms: a narrow request scope rather than blanket denial, and persistent appeals rather than immediate abandonment.
+
+\subsection{Utility Function and Payoff Analysis}
+\label{sec:payoff}
+
+To formalize the strategic structure, we define agent utility functions over simulation outcomes. Let $R^P$ denote the total reimbursement the provider receives for approved and paid services, let $S^I$ denote the total value of services on the final submitted request (the insurer's exposure), and let $C_P = n \cdot c_P$ and $C_I = n \cdot c_I$ denote the total administrative costs for provider and insurer respectively, where $n$ is the number of Phase~2 negotiation turns and $c_P$, $c_I$ are per-turn costs. We define:
+\begin{align}
+    U_P &= R^P - \alpha_P \cdot C_P \label{eq:u_provider} \\
+    U_I &= S^I - R^P - \alpha_I \cdot C_I \label{eq:u_insurer}
+\end{align}
+where $\alpha_P, \alpha_I \geq 0$ weight how much each agent values administrative burden relative to financial outcomes. The provider maximizes reimbursement net of admin burden. The insurer's utility reflects the value of denied services ($S^I - R^P$, which equals $S^I$ when everything is denied and $0$ when everything is approved) minus administrative burden. When $\alpha = 0$, admin costs are ignored; when $\alpha = 1$, a dollar of admin cost is weighted equally to a dollar of reimbursement or savings.
+
+We price services using CMS reimbursement rates: drug costs from CMS ASP Q4~2025, lab costs from Clinical Lab Fee Schedule 2025, and per-turn administrative costs from the CAQH 2023 Index ($c_P = \$5.79$, $c_I = \$0.05$ for electronic PA). Four procedure codes (96365, 96413, 74183, 72197) use benchmark estimates bounded by verified CMS PFS facility rates; these account for less than 15\% of total service value in any condition. Full pricing sources are in Appendix~\ref{sec:cost-data}.
+
+We first analyze the 2$\times$2 cooperate-defect subgame. Table~\ref{tab:payoff} presents the payoff matrix at $\alpha_P = \alpha_I = 1$ (admin costs weighted at face value); we then examine how the game's structure changes under other parameterizations.
+
+\begin{table*}[t]
+\centering
+\caption{Payoff matrix ($U_P$, $U_I$) at $\alpha_P = \alpha_I = 1$. Service values and admin costs in USD. Admin: $c_P = \$5.79$/turn, $c_I = \$0.05$/turn.}
+\label{tab:payoff}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{Insurer Cooperate} & \textbf{Insurer Defect} \\
+\midrule
+\textbf{Provider Cooperate} & (\$1,868; $-$\$0.10) & ($-$\$23; \$2,828) \\
+\textbf{Provider Defect} & (\$5,157; $-$\$0.10) & ($-$\$23; \$2,274) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The insurer has a strictly dominant strategy to defect: $U_I^D > U_I^C$ regardless of provider strategy (\$2,828~$>$~$-$\$0.10 when the provider cooperates; \$2,274~$>$~$-$\$0.10 when the provider defects). Denying all services and retaining thousands of dollars in savings dominates paying out reimbursement, even after accounting for negligible admin costs. The provider has a \emph{weakly} dominant strategy to defect: strictly preferred when the insurer cooperates (\$5,157~$>$~\$1,868), tied when the insurer defects ($-$\$23~$=$~$-$\$23). The Nash equilibrium is mutual defection ($-$\$23, \$2,274).
+
+Whether this constitutes a prisoner's dilemma depends on parameterization. A prisoner's dilemma requires mutual cooperation to Pareto-dominate mutual defection for both players. At $\alpha = 1$ with observed per-turn costs, the insurer \emph{prefers} mutual defection (\$2,274) to mutual cooperation ($-$\$0.10): denied-service savings dwarf the trivial admin cost. Under these parameters, the game is an asymmetric dominant-strategy exploitation rather than a PD. Both players defect at equilibrium, but for different reasons: the insurer defects because denial savings always exceed admin costs; the provider defects because, conditional on insurer cooperation, padding services extracts more reimbursement, and conditional on insurer defection, the outcome collapses to pure admin loss regardless of strategy. However, the PD structure emerges under parameterizations where insurer defection costs are higher, either through larger $\alpha_I$ (weighting administrative burden more heavily) or through incorporating the real-world costs our utility function omits (litigation risk, network effects, reputational damage; see Section~\ref{sec:limitations}). The sensitivity analysis below quantifies the threshold at which the game transitions from exploitation to prisoner's dilemma.
+
+The insurer's dominant defection is driven by a 116$\times$ per-transaction administrative cost asymmetry ($c_P = \$5.79$ vs.\ $c_I = \$0.05$). The insurer pays almost nothing for additional turns, so denial is nearly free. This formalizes a commonly described real-world dynamic: prior authorization imposes costs almost entirely on providers, giving insurers little incentive to streamline the process \citep{ama2024pa}.
+
+\paragraph{Sensitivity to burden weight.}
+The insurer's dominant defection is robust to the burden-weight parameters $\alpha_P$ and $\alpha_I$. Because insurer admin costs are so low ($c_I = \$0.05$/turn), the insurer's strategy only changes when $\alpha_I$ reaches extreme values: the insurer becomes indifferent between cooperation and defection against a defecting provider at $\alpha_I \approx S^{DD} / \Delta C_I = \$2{,}274 / (2 \times \$0.05) \approx 22{,}700$, meaning admin costs would need to be weighted ${\sim}23{,}000\times$ their dollar value to alter the insurer's incentive. Against a cooperating provider, the threshold is even higher ($\alpha_I \approx 28{,}300$). These thresholds drop dramatically if per-turn insurer costs rise to match provider costs (e.g., at $c_I = c_P = \$5.79$, the thresholds fall to $\alpha_I \approx 196$ and $\approx 244$), values at which the game transitions to a prisoner's dilemma, consistent with the coordination-failure hypothesis of \citet{moritz2025lancet}. Whether real-world insurer costs (incorporating litigation, network, and reputational factors) reach these levels is an empirical question our simulation does not resolve. The interactive sensitivity analysis in the supplementary materials allows exploration of all six parameters ($R^{CC}$, $R^{DC}$, $S^{CD}$, $S^{DD}$, $\alpha_P$, $\alpha_I$).
+
+\subsection{LLM Stochasticity}
+\label{sec:stochastic}
+
+LLM outputs are stochastic: identical prompts and inputs can produce different outputs across runs. We observed this in two additional runs under the same strategy conditions.
+
+Under CP\_CI, the main run requested 2 lines using a bundled hepatitis panel (80074) and selected biosimilar Q5121 (Avsola), while an alternate run requested 4 lines with individual serologies (87340, 86704, 86706) and selected biosimilar Q5103 (Inflectra). Both reached full approval in 2 turns, but through different service compositions and biosimilar selections.
+
+Under CP\_DI, stochastic variation produced qualitatively different outcomes. The main run lasted 4~turns: the provider resubmitted three times, eventually simplified to infliximab alone, and chose \texttt{ABANDON} with \texttt{NO\_TREAT} (zero services delivered, provider payoff $-$\$23). An alternate run lasted only 2~turns: the provider resubmitted once with added hepatitis labs, then upon blanket denial chose \texttt{TREAT\_ANYWAY} for the labs (subsequently paid at claims) but \texttt{NO\_TREAT} for infliximab (partial delivery, provider payoff \$18). The same strategy pairing yielded payoffs of $-$\$23 versus \$18 depending solely on LLM sampling.
+
+This stochasticity affects the qualitative game structure. With the main run's CP\_DI payoff ($-$\$23), the provider is indifferent under insurer defection and defection is weakly dominant. With the alternate run's payoff (\$18), the provider strictly prefers cooperation under insurer defection, eliminating the provider's dominant strategy entirely and shifting the Nash equilibrium from (D,D) to (C,D). The game-theoretic classification is itself LLM-sampling-dependent, underscoring the need for multiple replications per condition.
