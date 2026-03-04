@@ -15,7 +15,8 @@ jobs:
       - name: Compile LaTeX
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: AI_Arms_Race_in_Prior_Authorization/main.tex
+          root_file: main.tex
+          working_directory: AI_Arms_Race_in_Prior_Authorization
           latexmk_use_xelatex: false
           latexmk_shell_escape: true
 
