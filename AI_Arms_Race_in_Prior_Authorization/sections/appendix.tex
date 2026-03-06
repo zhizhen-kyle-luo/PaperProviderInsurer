@@ -6,7 +6,7 @@ The patient case is represented as a structured JSON object with two top-level p
 \section{Policy Documents}
 \label{sec:policies}
 
-Each agent receives one document---the provider a clinical guideline, the insurer a coverage policy---creating the information asymmetry described in Section~\ref{sec:case}. Below we reproduce the coverage criteria as structured for agent consumption.
+Each agent receives one document (the provider a clinical guideline, the insurer a coverage policy), creating the information asymmetry described in Section~\ref{sec:case}. Below we reproduce the coverage criteria as structured for agent consumption.
 
 \subsection{Provider: AGA 2021 Guidelines}
 
@@ -74,7 +74,7 @@ Section~\ref{sec:strategy} presents the core guidance for each strategy conditio
 \section{Agent Specifications and Action Spaces}
 \label{sec:agent-details}
 
-This appendix provides the full technical specification of agent action spaces and request/response schemas summarized in Section~\ref{sec:agents}.
+This appendix provides the full technical specification of agent action spaces and request/response schemas summarized in Section~\ref{sec:simulation}.
 
 \subsection{Service Line Types}
 
@@ -153,7 +153,7 @@ Each simulation run produces a structured audit log containing the complete sequ
 \section{Review Level Design}
 \label{sec:appeal-levels}
 
-Our three-level review structure (Section~\ref{sec:levels}) is grounded in the Medicare Fee-for-Service appeals process \citep{cms2024appeals}. Medicare defines five levels of appeal that follow an initial coverage determination:
+Our three-level review structure (Section~\ref{sec:simulation}) is grounded in the Medicare Fee-for-Service appeals process \citep{cms2024appeals}. Medicare defines five levels of appeal that follow an initial coverage determination:
 
 \begin{enumerate}
     \item \textbf{Redetermination} by a Medicare Administrative Contractor (MAC)
@@ -186,7 +186,7 @@ Not modeled & Federal Court & -- \\
 
 We model through Level~2 because Levels~1--2 represent the administrative appeals process in which the dispute remains between the provider and insurer (or an independent reviewer). Levels~3--5 involve formal legal proceedings with different rules of evidence, representation requirements, and adjudicatory bodies, placing them outside the scope of an LLM-mediated negotiation simulation.
 
-In practice, each real-world review level involves different reviewer types: initial determinations may be handled by utilization management nurses or automated systems, first-level appeals may involve medical director peer-to-peer review, and independent external reviews are conducted by entities with no relationship to the insurer. Our simulation does not encode these distinctions; the same insurer agent adjudicates at all levels (see Section~\ref{sec:limitations} for discussion of this limitation).
+In practice, each real-world review level involves different reviewer types: initial determinations may be handled by utilization management nurses or automated systems, first-level appeals may involve medical director peer-to-peer review, and independent external reviews are conducted by entities with no relationship to the insurer. Our simulation does not encode these distinctions; the same insurer agent adjudicates at all levels (see Section~\ref{sec:discussion}).
 
 \section{Cost Data Sources}
 \label{sec:cost-data}

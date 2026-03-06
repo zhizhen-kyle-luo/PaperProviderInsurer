@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Phase 2 – Utilization Review Flowchart</title>
+<style>
+  body { margin: 0; padding: 30px; background: white; display: flex; justify-content: center; }
+  svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<!--
+  Coordinate reference:
+    Submit Request:  center (255, 148), rect x=150–360, y=118–178
+    Adjudicate:      center (535, 148), rect x=450–620, y=118–178
+    Synthesize:      center (822, 148), rect x=752–892, y=118–178
+    Diamond:         center (305, 312), half-w=82, half-h=62
+                     top(305,250) right(387,312) bottom(305,374) left(223,312)
+    ABANDONED:       center (130, 472), rect x=50–210, y=447–497
+    MOD ACCEPTED:    center (345, 472), rect x=248–442, y=447–497
+    APPROVED:        center (538, 472), rect x=460–616, y=447–497
+-->
+<svg viewBox="0 0 1000 530" width="1100" height="583" xmlns="http://www.w3.org/2000/svg"
+     font-family="Arial, Helvetica, sans-serif">
+<defs>
+  <marker id="ah" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">
+    <path d="M0,0 L10,3.5 L0,7 Z" fill="#333"/>
+  </marker>
+</defs>
+
+<rect width="1000" height="530" fill="white"/>
+
+<!-- ── Phase chevrons ── -->
+<path d="M2,2 L236,2 L251,22 L236,42 L2,42 Z"              fill="#cecece" stroke="#aaa" stroke-width="0.8"/>
+<path d="M238,2 L472,2 L487,22 L472,42 L238,42 L253,22 Z"  fill="white"   stroke="#333" stroke-width="1.4"/>
+<path d="M474,2 L708,2 L723,22 L708,42 L474,42 L489,22 Z"  fill="#cecece" stroke="#aaa" stroke-width="0.8"/>
+<path d="M710,2 L944,2 L959,22 L944,42 L710,42 L725,22 Z"  fill="#cecece" stroke="#aaa" stroke-width="0.8"/>
+
+<text x="119" y="19" text-anchor="middle" font-size="13" fill="#555">Phase 1</text>
+<text x="119" y="34" text-anchor="middle" font-size="11" fill="#555">(Load Case)</text>
+<text x="355" y="19" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">Phase 2</text>
+<text x="355" y="34" text-anchor="middle" font-size="11" font-weight="bold" fill="#111">(Utilization Review)</text>
+<text x="591" y="19" text-anchor="middle" font-size="13" fill="#555">Phase 3</text>
+<text x="591" y="34" text-anchor="middle" font-size="11" fill="#555">(Claims Adjudication)</text>
+<text x="827" y="19" text-anchor="middle" font-size="13" fill="#555">Phase 4</text>
+<text x="827" y="34" text-anchor="middle" font-size="11" fill="#555">(Metrics)</text>
+
+<!-- ── Column backgrounds ── -->
+<rect x="0"   y="50" width="410" height="480" fill="#e6f4e6" opacity="0.55"/>
+<rect x="410" y="50" width="310" height="480" fill="#daeaf8" opacity="0.60"/>
+<rect x="720" y="50" width="280" height="480" fill="#f3e6f0" opacity="0.55"/>
+
+<!-- ── Column headers ── -->
+<text x="205"  y="65" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Provider Agent</text>
+<text x="565"  y="65" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Insurer Agent</text>
+<text x="860"  y="65" text-anchor="middle" font-size="15" font-weight="bold" fill="#222">Environment</text>
+
+<!-- ══════════════════════════════════════════════
+     NODES
+     ══════════════════════════════════════════════ -->
+
+<!-- Submit Request (Service Lines) -->
+<rect x="150" y="118" width="210" height="60" rx="12" fill="white" stroke="#333" stroke-width="1.8"/>
+<text x="255" y="145" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">Submit Request</text>
+<text x="255" y="163" text-anchor="middle" font-size="13" fill="#222">(Entry Point)</text>
+
+<!-- Adjudicate (Per Line) -->
+<rect x="450" y="118" width="170" height="60" rx="12" fill="white" stroke="#333" stroke-width="1.8"/>
+<text x="535" y="145" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">Adjudicate</text>
+<text x="535" y="163" text-anchor="middle" font-size="13" fill="#222">(Per Line)</text>
+
+<!-- Synthesize Test Results -->
+<rect x="752" y="118" width="140" height="60" rx="12" fill="white" stroke="#333" stroke-width="1.8"/>
+<text x="822" y="145" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">Synthesize</text>
+<text x="822" y="163" text-anchor="middle" font-size="13" fill="#222">Test Results</text>
+
+<!-- Provider Decision diamond  center(305,312) hw=82 hh=62 -->
+<path d="M305,250 L387,312 L305,374 L223,312 Z" fill="white" stroke="#333" stroke-width="1.8"/>
+<text x="305" y="308" text-anchor="middle" font-size="14" fill="#111">Provider</text>
+<text x="305" y="325" text-anchor="middle" font-size="14" fill="#111">Decision</text>
+
+<!-- ABANDONED -->
+<rect x="80" y="447" width="160" height="55" rx="3" fill="#d2d2d2" stroke="#333" stroke-width="1.8"/>
+<text x="160" y="469" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">ABANDONED</text>
+<text x="160" y="488" text-anchor="middle" font-size="10" fill="#222">(No Treat / Treat Anyway)</text>
+
+<!-- MODIFICATION ACCEPTED -->
+<rect x="248" y="447" width="194" height="55" rx="3" fill="#d2d2d2" stroke="#333" stroke-width="1.8"/>
+<text x="345" y="469" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">MODIFICATION</text>
+<text x="345" y="488" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">ACCEPTED</text>
+
+<!-- APPROVED -->
+<rect x="460" y="447" width="156" height="55" rx="3" fill="#d2d2d2" stroke="#333" stroke-width="1.8"/>
+<text x="538" y="481" text-anchor="middle" font-size="17" font-weight="bold" fill="#111">APPROVED</text>
+
+<!-- ══════════════════════════════════════════════
+     ARROWS
+     ══════════════════════════════════════════════ -->
+
+<!-- 1. Submit Request → Adjudicate (forward) -->
+<line x1="360" y1="156" x2="450" y2="156" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+
+<!-- 2. Adjudicate → Submit Request  (modified — goes back left) -->
+<line x1="450" y1="142" x2="360" y2="142" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="405" y="134" text-anchor="middle" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">modified</text>
+
+<!-- 3. Adjudicate → Provider Decision  (denied — diagonal)
+     Start: left edge of Adjudicate (450,160). End: upper-right edge of diamond.
+     Upper-right edge: (305,250)→(387,312). At x=372: t=(372-305)/82=0.817, y=250+62*0.817=300.7 -->
+<line x1="450" y1="162" x2="373" y2="301" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="425" y="215" text-anchor="middle" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">denied</text>
+
+<!-- 4. Adjudicate → Provider Decision  (pending_info* — steeper diagonal)
+     Start: lower-center of Adjudicate (520,178). End: right vertex (387,312). -->
+<line x1="520" y1="178" x2="388" y2="311" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="472" y="262" text-anchor="middle" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">pending_info*</text>
+<text x="472" y="278" text-anchor="middle" font-size="10" fill="#555" font-style="italic"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">*Not available at Level 2</text>
+
+<!-- 5. Adjudicate → APPROVED  (approved — vertical) -->
+<line x1="538" y1="178" x2="538" y2="447" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="550" y="345" text-anchor="start" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">approved</text>
+
+<!-- 6. Adjudicate → Synthesize Test Results (horizontal right) -->
+<line x1="620" y1="148" x2="752" y2="148" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="686" y="133" text-anchor="middle" font-size="12" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">if approved</text>
+<text x="686" y="147" text-anchor="middle" font-size="12" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">diagnostic test</text>
+
+<!-- 7. Synthesize Test Results → Submit Request  (results added — up, left, down) -->
+<path d="M822,118 L822,90 L255,90 L255,118" fill="none" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="538" y="83" text-anchor="middle" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">results added</text>
+
+<!-- ── Three left-side feedback loops ──
+     Nesting order (outer encapsulates inner):
+       PROVIDE_DOCS: bottom tip (305,374) → farthest left x=55  → up to top of box y=120
+       APPEAL:       left tip   (223,312) → middle left   x=85  → up to middle-left y=148
+       RESUBMIT:     top tip    (305,250) → least left    x=115 → up to bottom-left y=170
+
+     Submit Request box: x=150, y=118, w=210, h=60
+       top-left corner:    (150, 118)
+       middle-left:        (150, 148)
+       bottom-left corner: (150, 178)
+-->
+
+<!-- PROVIDE_DOCS — outermost loop: bottom tip → farthest left → top-left of box -->
+<path d="M305,374 L55,374 L55,120 L150,120"
+      fill="none" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="140" y="367" text-anchor="end" font-size="10.5" font-weight="bold" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">PROVIDE_DOCS</text>
+<text x="140" y="380" text-anchor="end" font-size="9" fill="#555"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">(same level)</text>
+
+<!-- APPEAL — middle loop: left tip → middle left → middle-left of box -->
+<path d="M223,312 L85,312 L85,148 L150,148"
+      fill="none" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="140" y="305" text-anchor="end" font-size="10.5" font-weight="bold" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">APPEAL</text>
+<text x="140" y="318" text-anchor="end" font-size="9" fill="#555"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">(level + 1)</text>
+
+<!-- RESUBMIT — innermost loop: top tip → least left → bottom-left of box -->
+<path d="M305,250 L115,250 L115,175 L150,175"
+      fill="none" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="140" y="243" text-anchor="end" font-size="10.5" font-weight="bold" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">RESUBMIT</text>
+<text x="140" y="256" text-anchor="end" font-size="9" fill="#555"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">(level := 0)</text>
+
+<!-- ABANDON — diagonal from bottom tip to top-center of ABANDONED box -->
+<line x1="305" y1="374" x2="160" y2="447" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="205" y="405" text-anchor="middle" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">ABANDON</text>
+
+<!-- ACCEPT_MODIFY — diagonal from bottom tip to top-center of MOD ACCEPTED box -->
+<line x1="305" y1="374" x2="345" y2="447" stroke="#333" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="355" y="405" text-anchor="start" font-size="13" fill="#222"
+      style="paint-order:stroke fill" stroke="white" stroke-width="3" stroke-linejoin="round">ACCEPT_MODIFY</text>
+
+</svg>
+</body>
+</html>
