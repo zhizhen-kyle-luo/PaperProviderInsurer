@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Figure 2: Provider Per-Line Action Space</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .container { width: 960px; }
+  .phase-bar { display: flex; height: 36px; margin-bottom: 12px; }
+  .phase-chevron {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #000; background: #e0e0e0;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+  }
+  .phase-chevron:first-child { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
+  .phase-chevron:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 16px 50%); }
+  .phase-chevron.active { background: #bbb; font-weight: 800; }
+  svg { display: block; width: 960px; height: 520px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="phase-bar">
+    <div class="phase-chevron">Insurer Decision</div>
+    <div class="phase-chevron active">Provider Action</div>
+    <div class="phase-chevron">Outcome</div>
+  </div>
+
+  <svg viewBox="0 0 960 520" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+    <defs>
+      <marker id="a" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#000"/></marker>
+      <marker id="ad" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5Z" fill="#666"/></marker>
+    </defs>
+
+    <!-- ============================================================ -->
+    <!-- BACKWARD DASHED ARROWS (drawn first so boxes render on top)  -->
+    <!-- ============================================================ -->
+
+    <!-- APPEAL from modified: diamond top → up to y=15 → left to x=66 → DOWN into box TOP at (66,207) -->
+    <line x1="450" y1="150" x2="450" y2="15" stroke="#000" stroke-width="1.5"/>
+    <line x1="450" y1="15" x2="66" y2="15" stroke="#000" stroke-width="1.5"/>
+    <line x1="66" y1="15" x2="66" y2="207" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="208" y="9" text-anchor="middle" font-size="10.5" fill="#000" font-style="italic">APPEAL** (level+1)</text>
+
+    <!-- APPEAL from denied: diamond top → up to y=242 → LEFT into box RIGHT SIDE at (132,242) -->
+    <line x1="450" y1="290" x2="450" y2="242" stroke="#000" stroke-width="1.5"/>
+    <line x1="450" y1="242" x2="132" y2="242" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="241" y="235" text-anchor="middle" font-size="10.5" fill="#000" font-style="italic">APPEAL** (level+1)</text>
+
+    <!-- PROVIDE_DOCS from pending_info: diamond bottom → down to y=505 → left to x=66 → UP into box BOTTOM at (66,277) -->
+    <line x1="450" y1="460" x2="450" y2="505" stroke="#000" stroke-width="1.5"/>
+    <line x1="450" y1="505" x2="66" y2="505" stroke="#000" stroke-width="1.5"/>
+    <line x1="66" y1="505" x2="66" y2="277" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="208" y="499" text-anchor="middle" font-size="10.5" fill="#000" font-style="italic">PROVIDE_DOCS (same level)</text>
+
+    <!-- ============================================================ -->
+    <!-- FAR LEFT: Adjudicate (Per Line) box                          -->
+    <!-- ============================================================ -->
+    <rect x="0" y="207" width="132" height="70" rx="4" fill="#fff" stroke="#000" stroke-width="2.5"/>
+    <text x="66" y="233" text-anchor="middle" font-size="14" font-weight="700">Adjudicate</text>
+    <text x="66" y="252" text-anchor="middle" font-size="14" font-weight="700">(Per Line)</text>
+
+    <!-- ============================================================ -->
+    <!-- Fan-out: Adjudicate → 4 status boxes                         -->
+    <!-- Exits spaced at y=222,233,252,263 (gap at y=243 for APPEAL)  -->
+    <!-- Vertical trunks: x=148 (outer pair), x=152 (inner pair)      -->
+    <!-- ============================================================ -->
+
+    <!-- To approved: exit y=222, trunk x=148 up to y=50 -->
+    <line x1="132" y1="222" x2="148" y2="222" stroke="#000" stroke-width="1.5"/>
+    <line x1="148" y1="222" x2="148" y2="50" stroke="#000" stroke-width="1.5"/>
+    <line x1="148" y1="50" x2="170" y2="50" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- To modified: exit y=233, trunk x=152 up to y=170 -->
+    <line x1="132" y1="233" x2="152" y2="233" stroke="#000" stroke-width="1.5"/>
+    <line x1="152" y1="233" x2="152" y2="170" stroke="#000" stroke-width="1.5"/>
+    <line x1="152" y1="170" x2="170" y2="170" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- To denied: exit y=252, trunk x=152 down to y=310 -->
+    <line x1="132" y1="252" x2="152" y2="252" stroke="#000" stroke-width="1.5"/>
+    <line x1="152" y1="252" x2="152" y2="310" stroke="#000" stroke-width="1.5"/>
+    <line x1="152" y1="310" x2="170" y2="310" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- To pending_info: exit y=263, trunk x=148 down to y=440 -->
+    <line x1="132" y1="263" x2="148" y2="263" stroke="#000" stroke-width="1.5"/>
+    <line x1="148" y1="263" x2="148" y2="440" stroke="#000" stroke-width="1.5"/>
+    <line x1="148" y1="440" x2="170" y2="440" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- ============================================================ -->
+    <!-- STATUS BOXES                                                  -->
+    <!-- ============================================================ -->
+    <rect x="170" y="28" width="146" height="44" rx="3" fill="#f0f0f0" stroke="#000" stroke-width="1.8"/>
+    <text x="243" y="56" text-anchor="middle" font-size="13" font-weight="700">approved</text>
+
+    <rect x="170" y="148" width="146" height="44" rx="3" fill="#f0f0f0" stroke="#000" stroke-width="1.8"/>
+    <text x="243" y="176" text-anchor="middle" font-size="13" font-weight="700">modified</text>
+
+    <rect x="170" y="288" width="146" height="44" rx="3" fill="#f0f0f0" stroke="#000" stroke-width="1.8"/>
+    <text x="243" y="316" text-anchor="middle" font-size="13" font-weight="700">denied</text>
+
+    <rect x="170" y="418" width="146" height="44" rx="3" fill="#f0f0f0" stroke="#000" stroke-width="1.8"/>
+    <text x="243" y="446" text-anchor="middle" font-size="13" font-weight="700">pending_info*</text>
+
+    <!-- ============================================================ -->
+    <!-- PROVIDER ACTION: Diamonds (all monochrome white/black)        -->
+    <!-- ============================================================ -->
+
+    <!-- Row 1: approved → straight through to terminal -->
+    <line x1="316" y1="50" x2="710" y2="50" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- Row 2: modified → diamond (longer arrow: 316→430) -->
+    <line x1="316" y1="170" x2="430" y2="170" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <polygon points="450,150 470,170 450,190 430,170" fill="#fff" stroke="#000" stroke-width="2"/>
+
+    <!-- Row 3: denied → diamond -->
+    <line x1="316" y1="310" x2="430" y2="310" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <polygon points="450,290 470,310 450,330 430,310" fill="#fff" stroke="#000" stroke-width="2"/>
+
+    <!-- Row 4: pending_info → diamond -->
+    <line x1="316" y1="440" x2="430" y2="440" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <polygon points="450,420 470,440 450,460 430,440" fill="#fff" stroke="#000" stroke-width="2"/>
+
+    <!-- ============================================================ -->
+    <!-- FORWARD ARROWS (solid, go right)                              -->
+    <!-- ============================================================ -->
+
+    <!-- ACCEPT_MODIFY from modified → starts at right vertex (470,170), branches up-right, then further right, down, left into MOD ACCEPTED -->
+    <line x1="470" y1="170" x2="480" y2="162" stroke="#000" stroke-width="1.5"/>
+    <line x1="480" y1="162" x2="650" y2="162" stroke="#000" stroke-width="1.5"/>
+    <line x1="650" y1="162" x2="650" y2="220" stroke="#000" stroke-width="1.5"/>
+    <line x1="650" y1="220" x2="710" y2="220" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="560" y="155" text-anchor="middle" font-size="11" font-weight="600">ACCEPT_MODIFY</text>
+
+    <!-- ABANDON from modified → starts at right vertex (470,170), branches down-right, then to converge -->
+    <line x1="470" y1="170" x2="480" y2="178" stroke="#000" stroke-width="1.5"/>
+    <line x1="480" y1="178" x2="590" y2="178" stroke="#000" stroke-width="1.5"/>
+    <line x1="590" y1="178" x2="590" y2="380" stroke="#000" stroke-width="1.5"/>
+    <text x="530" y="192" text-anchor="middle" font-size="10.5" font-weight="600">ABANDON</text>
+
+    <!-- ABANDON from denied → converge -->
+    <line x1="470" y1="310" x2="590" y2="310" stroke="#000" stroke-width="1.5"/>
+    <text x="530" y="303" text-anchor="middle" font-size="10.5" font-weight="600">ABANDON</text>
+
+    <!-- ABANDON from pending_info → converge -->
+    <line x1="470" y1="440" x2="590" y2="440" stroke="#000" stroke-width="1.5"/>
+    <line x1="590" y1="440" x2="590" y2="380" stroke="#000" stroke-width="1.5"/>
+    <text x="530" y="453" text-anchor="middle" font-size="10.5" font-weight="600">ABANDON</text>
+
+    <!-- Converge point → ABANDONED -->
+    <circle cx="590" cy="380" r="3.5" fill="#000"/>
+    <line x1="593" y1="380" x2="710" y2="380" stroke="#000" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- ============================================================ -->
+    <!-- RIGHT: Terminal boxes (equally spaced)                        -->
+    <!-- ============================================================ -->
+    <rect x="710" y="22" width="220" height="56" rx="4" fill="#d0d0d0" stroke="#000" stroke-width="2.5"/>
+    <text x="820" y="48" text-anchor="middle" font-size="15" font-weight="800">APPROVED</text>
+    <text x="820" y="66" text-anchor="middle" font-size="9.5" fill="#333">(terminal — no provider action)</text>
+
+    <rect x="710" y="197" width="220" height="52" rx="4" fill="#d0d0d0" stroke="#000" stroke-width="2.5"/>
+    <text x="820" y="219" text-anchor="middle" font-size="13" font-weight="800">MODIFICATION</text>
+    <text x="820" y="237" text-anchor="middle" font-size="13" font-weight="800">ACCEPTED</text>
+
+    <rect x="710" y="348" width="220" height="70" rx="4" fill="#d0d0d0" stroke="#000" stroke-width="2.5"/>
+    <text x="820" y="374" text-anchor="middle" font-size="15" font-weight="800">ABANDONED</text>
+    <text x="820" y="393" text-anchor="middle" font-size="10" fill="#333">No Treat / Treat Anyway (Phase 2)</text>
+    <text x="820" y="408" text-anchor="middle" font-size="10" fill="#333">Write Off (Phase 3)</text>
+
+  </svg>
+</div>
+</body>
+</html>
